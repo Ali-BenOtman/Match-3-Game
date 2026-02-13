@@ -12,6 +12,9 @@ public class MoveManager : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private Text movesText;
 
+    [Header("Win Settings")]
+    [SerializeField] private int targetScore = 500;
+
     private int currentMoves;
 
     void Awake()
@@ -101,5 +104,49 @@ System.Collections.IEnumerator DelayedGameOver()
     {
         currentMoves = startingMoves;
         UpdateMovesUI();
+    }
+
+    public void CheckWinCondition()
+    {
+        int currentScore = ScoreManager.Instance.GetScore();
+
+        Debug.Log("CheckWinCOndition caled! Score: " + currentScore + " | Target: " + targetScore);
+        // Check win first
+        if (currentScore >= targetScore)
+        {
+            Debug.Log("WIN CONDITION MET!");
+            //Player Win
+            GameWin();
+            return;
+        }
+
+        //If not won yet, check if game over
+        if (currentMoves <= 0)
+        {
+            Debug.Log("GAME OVER CONDITION MET!");
+            GameOver();
+        }
+    }
+
+    void GameWin()
+    {
+        Debug.Log("YOU WIN!!! Target score reached!!!");
+        StartCoroutine(DelayedGameWin());
+    }
+
+    System.Collections.IEnumerator DelayedGameWin()
+    {
+        Debug.Log("Win Triggered - waiting for cascades.....");
+        BoardRefiller refiller = FindFirstObjectByType<BoardRefiller>();
+
+        //Waint until all cascades finish 
+        while (refiller.IsProcessing())
+        {
+            yield return null;
+        }
+        yield return new WaitForSeconds(1f);
+
+        Debug.Log("Final Score: " + ScoreManager.Instance.GetScore());
+        GameManager.Instance.ShowWinScreen();
     }
 }

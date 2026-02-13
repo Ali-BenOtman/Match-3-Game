@@ -49,6 +49,9 @@ public class ScoreManager : MonoBehaviour
 
         //Increases combo for cascades  
         currentCombo++;
+
+        //Check if player won
+        MoveManager.Instance.CheckWinCondition();
     }
 
     //Resset combo when player makes a new move
