@@ -43,11 +43,14 @@ public class MoveManager : MonoBehaviour
 
         Debug.Log("Moves remaining: " + currentMoves);
 
-        // Check if game over
+        // Check win/lose when moves run out
         if (currentMoves <= 0)
         {
-            GameOver();
+            CheckWinCondition ();
         }
+
+
+        
     }
 
     // Update the UI
@@ -110,22 +113,23 @@ System.Collections.IEnumerator DelayedGameOver()
     {
         int currentScore = ScoreManager.Instance.GetScore();
 
-        Debug.Log("CheckWinCOndition caled! Score: " + currentScore + " | Target: " + targetScore);
-        // Check win first
-        if (currentScore >= targetScore)
-        {
-            Debug.Log("WIN CONDITION MET!");
-            //Player Win
-            GameWin();
-            return;
-        }
-
-        //If not won yet, check if game over
+        Debug.Log("CheckWinCondition called! Score: " + currentScore + " | Target: " + targetScore);
+        //Only check win/ lose when moves run out 
         if (currentMoves <= 0)
         {
-            Debug.Log("GAME OVER CONDITION MET!");
-            GameOver();
+            //Check if they won (reached target score)
+            if (currentScore >= targetScore)
+            {
+                Debug.Log("WIN CONDITION MET");
+                GameWin();
+            }
+            else
+            {
+                Debug.Log("GAME OVER CONDITION MET");
+                GameOver();
+            }
         }
+        
     }
 
     void GameWin()
@@ -148,5 +152,19 @@ System.Collections.IEnumerator DelayedGameOver()
 
         Debug.Log("Final Score: " + ScoreManager.Instance.GetScore());
         GameManager.Instance.ShowWinScreen();
+    }
+
+    public void SetTargetScore(int score)
+    {
+        targetScore = score;
+        Debug.Log("Target score set to: " +  targetScore);
+    }
+
+    public void SetMaxMoves(int moves)
+    {
+        startingMoves = moves;
+        currentMoves = moves;
+        UpdateMovesUI();
+        Debug.Log("Moves set to: " + startingMoves);
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 // GameBoard.cs
 // This manages the entire game board and all tiles
 
-public class GameBoard : MonoBehaviour 
+public class GameBoard : MonoBehaviour
 {
     //SERIALIZED FIELDS - these appear in Unity Inspector so we can adjust them
     [Header("Board Settings")]
@@ -26,7 +26,7 @@ public class GameBoard : MonoBehaviour
     //Start is called when the game begins
     void Start()
     {
-        CreateBoard(); 
+        CreateBoard();
     }
 
     //Creates the entire board
@@ -120,7 +120,7 @@ public class GameBoard : MonoBehaviour
         Debug.Log("Swapped Tiles!!!");
     }
     //This makes width and height accesible
-    
+
 
     // Get a tile at a specific position
 
@@ -166,11 +166,30 @@ public class GameBoard : MonoBehaviour
         TileType randomType = GetRandomTileType();
         GameObject prefabToUse = GetPrefabForType(randomType);
 
-        GameObject tileObject = Instantiate (prefabToUse, transform);
+        GameObject tileObject = Instantiate(prefabToUse, transform);
         Tile tile = tileObject.GetComponent<Tile>();
 
         tile.Initialize(row, col, randomType);
         tiles[col, row] = tile;
         tileObject.name = "Tile (" + col + ", " + row + ")";
     }
+    public void RegenerateBoard()
+    {
+        //Destroy all existing tiles
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (tiles[x, y] != null)
+                {
+                    Destroy(tiles[x, y].gameObject);
+                    tiles[x, y] = null;
+                }
+            }
+        }
+
+        CreateBoard();
+        Debug.Log("Board regenerated");
+    }
+
 }

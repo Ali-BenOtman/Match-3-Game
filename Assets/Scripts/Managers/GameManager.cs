@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+
 public class GameManager : MonoBehaviour 
 {
     public static GameManager Instance;
@@ -16,6 +17,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Text starsText;
     [SerializeField] private Text winScoreText;
     [SerializeField] private Button nextLevelButton;
+
+    private int oneStarThreshold = 500;
+    private int twoStarThreshold = 700;
+    private int threeStarThreshold = 900;
 
 
     void Awake()
@@ -38,7 +43,7 @@ public class GameManager : MonoBehaviour
 
         //Set up restart button 
         restartButton.onClick.AddListener(RestartGame);
-        nextLevelButton.onClick.AddListener(RestartGame);
+        nextLevelButton.onClick.AddListener(LoadNextLevel);
     }
     public void ShowGameOver()
     {
@@ -61,6 +66,10 @@ public class GameManager : MonoBehaviour
 
         int finalScore = ScoreManager.Instance.GetScore();
         Debug.Log("Got final score: " + finalScore);
+        
+        
+        //Shows the threshhold for the scores
+        Debug.Log("Star thresholds - 1★: " + oneStarThreshold + " | 2★: " + twoStarThreshold + " | 3★: " + threeStarThreshold);
 
         int stars = CalculateStars(finalScore);
         Debug.Log("Calculated stars: " + stars);
@@ -86,9 +95,9 @@ public class GameManager : MonoBehaviour
 
     int CalculateStars(int score)
     {
-        if (score >= 800) return 3;
-        if (score >= 600) return 2;
-        if (score >= 500) return 1;
+        if (score >= threeStarThreshold) return 3;
+        if (score >= twoStarThreshold) return 2;
+        if (score >= oneStarThreshold) return 1;
         return 0;
     }
 
@@ -103,9 +112,61 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void RestartGame()
+    
+
+    public void SetStarThreshold(int oneStar, int twoStar, int threeStar)
     {
-        //Reload the current scene
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        oneStarThreshold = oneStar;
+        twoStarThreshold = twoStar;
+        threeStarThreshold = threeStar;
     }
+
+
+    //Full restart (reloads scene) - for the actual restart button
+    public void RestartGame()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+
+    //Resests game state without reloading scene - for next level
+    public void ResetGameState()
+    {
+        //Hides all UI panels
+        gameOverPanel.SetActive(false);
+        winPanel.SetActive(false );
+
+        //Resests score
+        ScoreManager.Instance.ResetScore();
+
+
+       //Resets moves (will be set by level manager)
+       MoveManager.Instance.ResetMoves();
+
+        // Clear and regenerate board
+        GameBoard board = FindFirstObjectByType<GameBoard>();
+        if (board != null)
+        {
+            board.RegenerateBoard();
+        }
+        Debug.Log("Game state reset for next level");
+
+    }
+
+    void LoadNextLevel()
+    {
+        LevelManager.Instance.LoadNextLevel();
+    }
+
+    public void ShowAllLevelsComplete()
+    {
+        winScoreText.text = "ALL LEVELS COMPLETE -- Final Score: " + ScoreManager.Instance.GetScore();
+        starsText.text = "YAAAY";
+        winPanel.SetActive(true);
+
+        // Hide next level button
+        nextLevelButton.gameObject.SetActive(false);
+    }
+
+    
 }
